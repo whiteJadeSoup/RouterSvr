@@ -33,7 +33,7 @@ public:
 
     std::string get_send_data();
 
-    int get_data_len();
+    int send_data_len();
 
 protected:
 private:

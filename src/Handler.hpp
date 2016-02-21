@@ -4,7 +4,6 @@
 #include <array>
 #include <string>
 #include <iostream>
-
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read.hpp>
@@ -13,14 +12,15 @@
 
 #include "CMsg.hpp"
 
+using namespace std;
 using namespace boost::asio;
 
-class Handler: public std::enable_shared_from_this<Handler>
+class Handler: public enable_shared_from_this<Handler>
 {
 
 
 public:
-    Handler (boost::asio::ip::tcp::socket&);
+    Handler (ip::tcp::socket);
     virtual ~Handler();
 
 public:
@@ -44,20 +44,33 @@ public:
 
 
 
-    template <typename T>
+    template <class T>
     void deserialization(T& t, boost::asio::streambuf& buf)
     {
 
-        std::ostringstream os;
+        ostringstream os;
         os << &buf;
 
-        std::string ser_data (os.str());
-        std::istringstream is(ser_data);
+        string ser_data (os.str());
+        istringstream is(ser_data);
         boost::archive::text_iarchive ia(is);
         ia & t;
 
-        std::cout << "rbuf size: " << buf.size() << std::endl;
+        cout << "buf size: " <<buf.size() <<endl;
     }
+
+    template <class T>
+    void parse_pb_message(T& t, boost::asio::streambuf& buf)
+    {
+        ostringstream os;
+        os << &buf;
+
+        string send_data (os.str());
+        t.ParseFromString(send_data);
+
+        cout << "buf size: " <<buf.size() <<endl;
+    }
+
 private:
 
     int get_len();  // 前4个字节为数据长度
@@ -71,12 +84,12 @@ protected:
      * 对clienthandler来说意味着一个客户端的socket的引用
      * 对routerhandler来说意味着连接routersvr的socket的引用
      */
-    ip::tcp::socket& m_sock;
+    ip::tcp::socket m_sock;
 
     boost::asio::streambuf m_rBuf;
     boost::asio::streambuf m_wBuf;
-    std::array<char, 8> head_info;
-    std::string send_str;
+    array<char, 8> head_info;
+    string send_str;
 };
 
 

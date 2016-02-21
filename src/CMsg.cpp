@@ -39,7 +39,7 @@ int CMsg::get_msg_type()
     return m_type;
 }
 
-int CMsg::get_data_len()
+int CMsg::send_data_len()
 {
     return m_send_data.size();
 }

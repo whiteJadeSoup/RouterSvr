@@ -16,7 +16,7 @@
 
 DispatchSession::DispatchSession(ip::tcp::socket socket_,
                                  std::vector<MsgSvrClient>& svrs_)
-    :Handler(m_MsgSvrSock),
+    :Handler(std::move(m_MsgSvrSock)),
      m_MsgSvrSock(std::move(socket_)),
      m_vecMsgSvrs(svrs_),
      m_min_and_max(std::make_tuple(0,0))
