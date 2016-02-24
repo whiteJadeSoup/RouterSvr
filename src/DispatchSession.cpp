@@ -16,8 +16,7 @@
 
 DispatchSession::DispatchSession(ip::tcp::socket socket_,
                                  std::vector<MsgSvrClient>& svrs_)
-    :Handler(std::move(m_MsgSvrSock)),
-     m_MsgSvrSock(std::move(socket_)),
+    :Handler(std::move(socket_)),
      m_vecMsgSvrs(svrs_),
      m_min_and_max(std::make_tuple(0,0))
 {
@@ -53,12 +52,12 @@ void DispatchSession::start()
 {
 
     std::cout<< "add msgsvr." <<std::endl;
-    m_vecMsgSvrs.emplace_back(this, m_MsgSvrSock);
+    //m_vecMsgSvrs.emplace_back(this, m_MsgSvrSock);
 
     read_head_from_socket();
 }
 
-void DispatchSession::process_msg(int type_)
+void DispatchSession::process_msg(int type_,string buf_)
 {
     std::cout << "begin process msg. " << std::endl;
     std::cout << "msg type: " << type_ << std::endl;
@@ -121,18 +120,6 @@ void DispatchSession::M2RMsg_AllocatePort()
 
     std::cout << "allocate port: " << nAllocatePort << std::endl;
 
-    auto it = std::find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
-                           [this] (MsgSvrClient& m)
-    {
-        return (DispatchSession*)m.get_context() == this;
-    });
-
-    if (it == m_vecMsgSvrs.end())
-    {
-        std::cout << "error,this isn't exist!" << std::endl;
-        return;
-    }
-
     Msg_allocate_port msg_result;
     msg_result.m_allocate_port = nAllocatePort;
 
@@ -140,7 +127,7 @@ void DispatchSession::M2RMsg_AllocatePort()
     msg.set_msg_type((int)TypeDefine::M2R_AllocatePort);
     msg.set_send_data(msg_result);
 
-    send_msg(it->get_socket(), msg);
+    send_msg(msg);
 
 }
 

@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <array>
+#include <string>
 #include <tuple>
 #include <map>
 
@@ -15,6 +16,8 @@
 #include "MsgSvrClient.hpp"
 
 using namespace boost::asio;
+using namespace std;
+
 
 class DispatchSession:public Handler
 {
@@ -26,7 +29,7 @@ public:
 
     void initialization();
     virtual void start();
-    virtual void process_msg(int type_);
+    virtual void process_msg(int, std::string);
 
 
 public:
@@ -45,7 +48,7 @@ private:
 
 
 private:
-    ip::tcp::socket m_MsgSvrSock;
+    //ip::tcp::socket m_MsgSvrSock;
 
 private:
     std::vector<MsgSvrClient>& m_vecMsgSvrs;
