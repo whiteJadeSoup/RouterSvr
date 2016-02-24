@@ -1,5 +1,6 @@
 
 #include "Handler.hpp"
+#include <arpa/inet.h>
 
 
 /**********************************************
@@ -39,22 +40,12 @@ void Handler::read_head_from_socket()
 
                 if (!ec)
                 {
-                    try
-                    {
-                        int nLen = get_len();
-                        int nType = get_type();
 
-                        cout << "data len: "<< nLen << "msg type: "<< nType << endl;
-                        read_body_from_socket(nLen, nType);
-                    }
-                    catch (exception& e)
-                    {
-                        cout << "# ERR: exception in " << __FILE__;
-                        cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
-                        cout << "# ERR: " << e.what() << endl;
+                    int32_t data_len = AsInt32(head_info);
+                    cout << data_len <<endl;
+                    // 开始读数据体
+                    read_body_from_socket(data_len);
 
-                        read_head_from_socket();
-                    }
                 }
 
                 else
@@ -68,17 +59,17 @@ void Handler::read_head_from_socket()
             });
 }
 
-void Handler::read_body_from_socket(int len_, int type_)
+void Handler::read_body_from_socket(int len_)
 {
     auto self = shared_from_this();
     async_read(m_sock, m_rBuf, transfer_exactly(len_),
-            [self, this, type_] (const err_code& ec, size_t len)
+            [self, this] (const err_code& ec, size_t len)
             {
 
                 if(!ec)
                 {
                     cout << "readed data size: " << len <<endl;
-                    process_msg(type_);
+                    decode();
                 }
 
                 else
@@ -106,47 +97,92 @@ ip::tcp::socket& Handler::get_socket()
  *
  */
 
-int Handler::get_len()
+int32_t Handler::AsInt32 (const char* buf)
 {
-    string len;
-    copy(head_info.begin(), head_info.begin()+4, back_inserter(len));
-    return std::stoi(len);
-}
-
-int Handler::get_type()
-{
-    string type;
-    copy(head_info.begin()+4, head_info.end(), back_inserter(type));
-    return std::stoi(type);
+    int32_t buf_len = 0;
+    std::copy(buf, buf + sizeof(int32_t), reinterpret_cast<char*>(&buf_len));
+    return ::ntohl(buf_len);
 }
 
 
-void Handler::encode_msg(CMsg& msg)
+
+shared_ptr<google::protobuf::Message> Handler::CreateMessage(const string& type_name)
+{
+    using namespace google::protobuf;
+
+    const Descriptor* dr = DescriptorPool::generated_pool()->FindMessageTypeByName(type_name);
+    if (dr == nullptr)
+    {
+        return nullptr;
+    }
+
+    const Message* proto = MessageFactory::generated_factory()->GetPrototype(dr);
+
+    if (proto == nullptr)
+    {
+        return nullptr;
+    }
+
+    shared_ptr<Message> p_message(proto->New());
+    return p_message;
+}
+
+
+void Handler::encode(CMsg& msg)
 {
     cout << "start encode msg" << endl;
+
     send_str.clear();
 
-    char len[5];
-    sprintf(len, "%4d", msg.send_data_len());
+    // 为头部预留空间
+    send_str.resize(sizeof(int32_t));
 
-    char type[5];
-    sprintf(type, "%4d", msg.get_msg_type());
+    // 消息类型
+    int32_t type = msg.get_msg_type();
+    int32_t be_type = ::htonl(type);
+    send_str.append(reinterpret_cast<char*>(&be_type), sizeof(be_type));
 
-    // data
-    string data = msg.get_send_data();
+    // 序列化数据
+    send_str.append(msg.get_send_data().c_str(), msg.send_data_len() + 1);
 
-    send_str.append(len);
-    send_str.append(type);
-    send_str.append(data);
 
-    cout << "headinfo: "      << send_str.substr(0,8) << endl;
-    cout << "data size: "      << data.size()          << endl;
-    cout << "send str size: "      << send_str.size()      << endl;
+    // 数据总长度
+    int32_t len = sizeof(int32_t) + msg.send_data_len() + 1;
+    int32_t be_len = ::htonl(len);
+    std::copy(reinterpret_cast<char*>(&be_len),
+              reinterpret_cast<char*>(&be_len) + sizeof(be_len),
+              send_str.begin());
+
+
+    cout << "send data len: " << msg.send_data_len() + 1 << endl;
+    cout << "send str size: " << send_str.size() << endl;
 }
+
+
+void Handler::decode()
+{
+    ostringstream os;
+    os << &m_rBuf;
+
+
+    // 收到的数据
+    string trans_data = os.str();
+
+    // 消息类型
+    int32_t type = AsInt32(trans_data.c_str());
+    cout << "type: " << type << endl;
+
+
+    // 序列化数据
+    std::string buf = trans_data.substr(sizeof(int32_t));
+    process_msg(type, buf);
+}
+
+
 
 void Handler::send_msg(ip::tcp::socket& sock_, CMsg& msg)
 {
-    encode_msg(msg);
+    encode(msg);
 
     cout << "start send msg." << endl;
     auto self = shared_from_this();
@@ -162,7 +198,6 @@ void Handler::send_msg(ip::tcp::socket& sock_, CMsg& msg)
                     cout << "# ERR: exception in " << __FILE__;
                     cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
                     cout << "# ERR: " << ec.message() << endl;
-
                     sock_.close();
                 }
             });
@@ -171,7 +206,7 @@ void Handler::send_msg(ip::tcp::socket& sock_, CMsg& msg)
 
 void Handler::send_msg(CMsg& msg)
 {
-    encode_msg(msg);
+    encode(msg);
 
     cout << "start send msg." << endl;
     auto self = shared_from_this();

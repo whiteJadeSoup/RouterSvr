@@ -9,6 +9,8 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/streambuf.hpp>
+#include <google/protobuf/descriptor.h>
+#include <google/protobuf/message.h>
 
 #include "CMsg.hpp"
 
@@ -25,7 +27,7 @@ public:
 
 public:
     virtual void start() = 0;
-    virtual void process_msg(int type_) = 0;
+    virtual void process_msg(int type_, string buf_) = 0;
 
 public:
     ip::tcp::socket& get_socket();
@@ -35,9 +37,10 @@ public:
      * @parm len  : 数据长度
      * @parm type : 消息类型
      */
-    void read_body_from_socket(int len, int type);
+    void read_body_from_socket(int len);
 
-    void encode_msg(CMsg&);
+    void encode(CMsg&);
+    void decode();
 
     void send_msg(CMsg&);
     void send_msg(ip::tcp::socket&, CMsg&);
@@ -60,21 +63,17 @@ public:
     }
 
     template <class T>
-    void parse_pb_message(T& t, boost::asio::streambuf& buf)
+    void parse_pb_message(T& t, const string& buf_)
     {
-        ostringstream os;
-        os << &buf;
-
-        string send_data (os.str());
-        t.ParseFromString(send_data);
-
-        cout << "buf size: " <<buf.size() <<endl;
+        t.ParseFromString(buf_);
+        cout << "buf size: " <<buf_.size() <<endl;
     }
 
-private:
+protected:
+    int32_t AsInt32 (const char* buf);
 
-    int get_len();  // 前4个字节为数据长度
-    int get_type(); //
+protected:
+    shared_ptr<google::protobuf::Message> CreateMessage(const string&);
 
 
 protected:
@@ -88,7 +87,8 @@ protected:
 
     boost::asio::streambuf m_rBuf;
     boost::asio::streambuf m_wBuf;
-    array<char, 8> head_info;
+
+    char head_info[4];
     string send_str;
 };
 
