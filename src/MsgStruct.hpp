@@ -20,6 +20,23 @@ struct Msg_Login
 
 };
 
+struct Msg_Logout
+{
+    int m_id;
+    Msg_Logout (): m_id(0)
+    {
+
+    }
+
+
+    template <typename Archive>
+    void serialize(Archive& ar, const unsigned int version)
+    {
+        ar & m_id;
+    }
+
+};
+
 
 struct Msg_chat
 {

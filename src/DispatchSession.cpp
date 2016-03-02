@@ -14,10 +14,8 @@
 
 
 
-DispatchSession::DispatchSession(ip::tcp::socket socket_,
-                                 std::vector<MsgSvrClient>& svrs_)
+DispatchSession::DispatchSession(ip::tcp::socket socket_)
     :Handler(std::move(socket_)),
-     m_vecMsgSvrs(svrs_),
      m_min_and_max(std::make_tuple(0,0))
 {
     initialization();
@@ -50,11 +48,7 @@ void DispatchSession::initialization()
 
 void DispatchSession::start()
 {
-
-    std::cout<< "add msgsvr." <<std::endl;
-    //m_vecMsgSvrs.emplace_back(this, m_MsgSvrSock);
-
-    read_head_from_socket();
+    read_head();
 }
 
 void DispatchSession::process_msg(int type_,string buf_)
@@ -63,24 +57,24 @@ void DispatchSession::process_msg(int type_,string buf_)
     std::cout << "msg type: " << type_ << std::endl;
     switch (type_)
     {
-    case (int)TypeDefine::M2R_DispatchChat:
+    case (int)M2R::DISPATCH_CHAT:
         std::cout<< "chat!" << std::endl;
-        M2RMsg_DispatchChat();
+        handle_dispatch_chat(buf_);
         break;
 
-    case (int)TypeDefine::M2R_UserLogin:
+    case (int)M2R::USER_LOGIN:
         std::cout<< "user login!" << std::endl;
-        M2RMsg_UserLogin();
+        handle_user_login(buf_);
         break;
 
-    case (int)TypeDefine::M2R_UserLogout:
+    case (int)M2R::USER_LOGOUT:
         std::cout<< "user logout!" << std::endl;
-        M2RMsg_UserLogout();
+        handle_user_logout(buf_);
         break;
 
-    case (int)TypeDefine::M2R_AllocatePort:
+    case (int)M2R::ALLOCATE_PORT:
         std::cout<< "allocate port!" << std::endl;
-        M2RMsg_AllocatePort();
+        handle_allocate_port(buf_);
         break;
     }
 
@@ -95,7 +89,7 @@ void DispatchSession::process_msg(int type_,string buf_)
  *
  */
 
-void DispatchSession::M2RMsg_AllocatePort()
+void DispatchSession::handle_allocate_port(string buf_)
 {
     std::ostringstream stream;
     stream <<&m_rBuf;
@@ -110,7 +104,9 @@ void DispatchSession::M2RMsg_AllocatePort()
     do
     {
         nAllocatePort = random(nMinPort, nMaxPort);
-        std::cout << "m_PortUses["<< nAllocatePort <<"] ="  << m_PortUses[nAllocatePort] << std::endl;
+        cout << "m_PortUses["
+             << nAllocatePort <<"] ="
+             << m_PortUses[nAllocatePort] << endl;
 
     }
     while(m_PortUses[nAllocatePort]);
@@ -123,24 +119,22 @@ void DispatchSession::M2RMsg_AllocatePort()
     Msg_allocate_port msg_result;
     msg_result.m_allocate_port = nAllocatePort;
 
-    CMsg msg;
-    msg.set_msg_type((int)TypeDefine::M2R_AllocatePort);
-    msg.set_send_data(msg_result);
+    CMsg packet;
+    packet.set_msg_type((int)M2R::ALLOCATE_PORT);
+    packet.serialization_data_Asio(msg_result);
 
-    send_msg(msg);
-
+    send(packet);
 }
 
 
 
 
 
-void DispatchSession::M2RMsg_UserLogin()
+void DispatchSession::handle_user_login(string buf_)
 {
 
     Msg_Login ml;
-    deserialization(ml, m_rBuf);
-
+    deserialization(ml, buf_);
 
     std::cout << "login id: " << ml.m_id << std::endl;
 
@@ -153,24 +147,23 @@ void DispatchSession::M2RMsg_UserLogin()
 
     if (it == m_vecMsgSvrs.end())
     {
-        std::cout << "add error,this isn't exist!" << std::endl;
+        std::cout << "error! this msgsvr is not connect!" << std::endl;
         return;
     }
 
     it->add_user(ml.m_id);
 }
 
-void DispatchSession::M2RMsg_UserLogout()
+void DispatchSession::handle_user_logout(string buf_)
 {
-    int nUserId = 0;
-    boost::archive::binary_iarchive ia(m_rBuf);
-    ia & nUserId;
+    Msg_Logout ml;
+    deserialization(ml, buf_);
 
     auto it = std::find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
-            [this] (MsgSvrClient& m)
-            {
-                return (DispatchSession*)m.get_context() == this;
-            });
+        [this] (MsgSvrClient& m)
+        {
+            return (DispatchSession*)m.get_context() == this;
+        });
 
     if (it == m_vecMsgSvrs.end())
     {
@@ -178,40 +171,37 @@ void DispatchSession::M2RMsg_UserLogout()
         return;
     }
 
-    it->del_user(nUserId);
-
+    it->del_user(ml.m_id);
 }
 
-void DispatchSession::M2RMsg_DispatchChat()
+void DispatchSession::handle_dispatch_chat(string buf_)
 {
-
+//
     Msg_chat recv_chat;
-    deserialization(recv_chat, m_rBuf);
+    deserialization(recv_chat, buf_);
 
     std::cout << "sendid: "     << recv_chat.m_send_id
               << "recvid: "     << recv_chat.m_recv_id
               << "content: "    << recv_chat.m_content << std::endl;
 
     auto it = find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
-                      [=] (MsgSvrClient& m)
-    {
-        return m.is_InSvr_ById(recv_chat.m_recv_id);
-    });
+        [=] (MsgSvrClient& m)
+        {
+            return m.is_in_svr(recv_chat.m_recv_id);
+        });
 
 
     if (it == m_vecMsgSvrs.end())
     {
-        std::cout << "offline!" << std::endl;
+        std::cout << "userid: " << recv_chat.m_recv_id << "offline!" << std::endl;
         return;
     }
 
+    CMsg packet;
+    packet.set_msg_type((int)M2R::SEND_CHAT);
+    packet.serialization_data_Asio(recv_chat);
 
-
-    CMsg msg;
-    msg.set_msg_type((int)TypeDefine::M2R_DispatchChat);
-    msg.set_send_data(recv_chat);
-
-    send_msg(it->get_socket(), msg);
+    send(packet, it->get_socket());
 }
 
 

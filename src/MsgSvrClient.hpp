@@ -13,7 +13,7 @@ public:
 
 public:
     // 指定id的用户是否在该服务器上
-    bool is_InSvr_ById(int32_t);
+    bool is_in_svr(int32_t);
     void add_user(int32_t);
     void del_user(int32_t);
 

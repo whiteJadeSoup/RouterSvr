@@ -25,37 +25,33 @@ public:
     using err_code = boost::system::error_code;
 
 public:
-    DispatchSession(ip::tcp::socket, std::vector<MsgSvrClient>& );
+    DispatchSession(ip::tcp::socket);
 
     void initialization();
     virtual void start();
-    virtual void process_msg(int, std::string);
+    virtual void process_msg(int, string);
 
 
 public:
-    void M2RMsg_DispatchChat();
-    void M2RMsg_UserLogin();
-    void M2RMsg_UserLogout();
-    void M2RMsg_AllocatePort();
+    void handle_dispatch_chat(string);
+    void handle_user_login(string);
+    void handle_user_logout(string);
+    void handle_allocate_port(string);
 
 private:
-
     // 随机获得【a,b】之间的数
     int random(int a,int b);
 
     // 获得区间如"9000-9500"的最小和最大值
-    std::tuple<int,int> get_min_max_port(std::string);
+    tuple<int,int> get_min_max_port(string);
 
 
 private:
-    //ip::tcp::socket m_MsgSvrSock;
-
-private:
-    std::vector<MsgSvrClient>& m_vecMsgSvrs;
+    vector<MsgSvrClient> m_vecMsgSvrs;
     // map<端口、是否被使用>
-    std::map<int, bool> m_PortUses;
+    map<int, bool> m_PortUses;
 
-    std::tuple<int,int> m_min_and_max;
+    tuple<int,int> m_min_and_max;
 
 };
 #endif // DISPATCHSESSION_HPP_INCLUDED
