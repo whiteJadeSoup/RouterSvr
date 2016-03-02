@@ -28,65 +28,56 @@ Handler::~Handler()
  *
  */
 
-
-void Handler::read_head_from_socket()
+void Handler::read_head()
 {
 
     cout << "start read head info!" << endl;
     auto self = shared_from_this();
     async_read(m_sock, boost::asio::buffer(head_info),
-            [this, self] (const err_code& ec, size_t len)
+        [this, self] (const err_code& ec, size_t len)
+        {
+            if (!ec)
             {
+                int32_t data_len = AsInt32(head_info);
+                cout << data_len <<endl;
 
-                if (!ec)
-                {
-
-                    int32_t data_len = AsInt32(head_info);
-                    cout << data_len <<endl;
-                    // 开始读数据体
-                    read_body_from_socket(data_len);
-
-                }
-
-                else
-                {
-                    cout << "# ERR: exception in " << __FILE__;
-                    cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
-                    cout << "# ERR: " << ec.message() << endl;
-
-                    m_sock.close();
-                }
-            });
+                // 开始读数据体
+                read_body(data_len);
+            }
+            else
+            {
+                cout << "# ERR: exception in " << __FILE__;
+                cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
+                cout << "# ERR: " << ec.message() << endl;
+                m_sock.close();
+            }
+        });
 }
 
-void Handler::read_body_from_socket(int len_)
+void Handler::read_body(int len_)
 {
     auto self = shared_from_this();
     async_read(m_sock, m_rBuf, transfer_exactly(len_),
-            [self, this] (const err_code& ec, size_t len)
+        [self, this] (const err_code& ec, size_t len)
+        {
+            if(!ec)
             {
-
-                if(!ec)
-                {
-                    cout << "readed data size: " << len <<endl;
-                    decode();
-                }
-
-                else
-                {
-                    cout << "# ERR: exception in " << __FILE__;
-                    cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
-                    cout << "# ERR: " << ec.message() << endl;
-
-                    m_sock.close();
-                }
-
-                read_head_from_socket();
-            });
+                cout << "readed data size: " << len <<endl;
+                decode();
+            }
+            else
+            {
+                cout << "# ERR: exception in " << __FILE__;
+                cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
+                cout << "# ERR: " << ec.message() << endl;
+                m_sock.close();
+            }
+            read_head();
+        });
 }
 
 
-ip::tcp::socket& Handler::get_socket()
+ip::tcp::socket& Handler::socket()
 {
     return m_sock;
 }
@@ -103,7 +94,6 @@ int32_t Handler::AsInt32 (const char* buf)
     std::copy(buf, buf + sizeof(int32_t), reinterpret_cast<char*>(&buf_len));
     return ::ntohl(buf_len);
 }
-
 
 
 shared_ptr<google::protobuf::Message> Handler::CreateMessage(const string& type_name)
@@ -164,7 +154,6 @@ void Handler::decode()
     ostringstream os;
     os << &m_rBuf;
 
-
     // 收到的数据
     string trans_data = os.str();
 
@@ -179,55 +168,50 @@ void Handler::decode()
 }
 
 
-
-void Handler::send_msg(ip::tcp::socket& sock_, CMsg& msg)
+void Handler::send(CMsg& msg, ip::tcp::socket& sock_)
 {
     encode(msg);
 
     cout << "start send msg." << endl;
     auto self = shared_from_this();
     async_write(sock_, boost::asio::buffer(send_str),
-            [this, self, &sock_] (const err_code& ec, size_t len)
+        [this, self, &sock_] (const err_code& ec, size_t len)
+        {
+            if (!ec)
             {
-                if (!ec)
-                {
-                    cout << "send data to client len: " << len << endl;
-                }
-                else
-                {
-                    cout << "# ERR: exception in " << __FILE__;
-                    cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
-                    cout << "# ERR: " << ec.message() << endl;
-                    sock_.close();
-                }
-            });
-
+                cout << "send data to client len: " << len << endl;
+            }
+            else
+            {
+                cout << "# ERR: exception in " << __FILE__;
+                cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
+                cout << "# ERR: " << ec.message() << endl;
+                sock_.close();
+            }
+        });
 }
 
-void Handler::send_msg(CMsg& msg)
+
+void Handler::send(CMsg& msg)
 {
     encode(msg);
 
     cout << "start send msg." << endl;
     auto self = shared_from_this();
     async_write(m_sock, boost::asio::buffer(send_str),
-                [this, self] (const err_code& ec, size_t len)
-                {
-                    if (!ec)
-                    {
-                        cout << "send data to client len: " << len << endl;
-                    }
-                    else
-                    {
-                        cout << "# ERR: exception in " << __FILE__;
-                        cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
-                        cout << "# ERR: " << ec.message() << endl;
-
-                        m_sock.close();
-                    }
-
-                });
+        [this, self] (const err_code& ec, size_t len)
+        {
+            if (!ec)
+            {
+                cout << "send data to client len: " << len << endl;
+            }
+            else
+            {
+                cout << "# ERR: exception in " << __FILE__;
+                cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
+                cout << "# ERR: " << ec.message() << endl;
+                m_sock.close();
+            }
+        });
 }
-
-
 

@@ -30,36 +30,29 @@ public:
     virtual void process_msg(int type_, string buf_) = 0;
 
 public:
-    ip::tcp::socket& get_socket();
-    void read_head_from_socket();
-    /*
-     * 读取指定大小长度的数据
-     * @parm len  : 数据长度
-     * @parm type : 消息类型
-     */
-    void read_body_from_socket(int len);
+    ip::tcp::socket& socket();
+    void read_head();
+    void read_body(int len);
+
+private:
 
     void encode(CMsg&);
     void decode();
-
-    void send_msg(CMsg&);
-    void send_msg(ip::tcp::socket&, CMsg&);
+    int32_t AsInt32 (const char* buf);
 
 
+public:
+    void send(CMsg&, ip::tcp::socket& sock_);
+    void send(CMsg&);
 
+
+protected:
     template <class T>
-    void deserialization(T& t, boost::asio::streambuf& buf)
+    void deserialization(T& t, string buf_)
     {
-
-        ostringstream os;
-        os << &buf;
-
-        string ser_data (os.str());
-        istringstream is(ser_data);
+        istringstream is(buf_);
         boost::archive::text_iarchive ia(is);
         ia & t;
-
-        cout << "buf size: " <<buf.size() <<endl;
     }
 
     template <class T>
@@ -69,8 +62,6 @@ public:
         cout << "buf size: " <<buf_.size() <<endl;
     }
 
-protected:
-    int32_t AsInt32 (const char* buf);
 
 protected:
     shared_ptr<google::protobuf::Message> CreateMessage(const string&);
