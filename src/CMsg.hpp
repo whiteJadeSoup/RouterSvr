@@ -2,9 +2,10 @@
 #define CMSG_H
 
 #include <boost/archive/text_oarchive.hpp>
-#include <string>
-#include <iostream>
 #include <sstream>
+#include <string>
+
+using namespace std;
 
 class CMsg
 {
@@ -14,31 +15,43 @@ public:
     CMsg(const CMsg& other);
     CMsg& operator=(const CMsg& other);
 
+public:
+
+    const string& get_send_data() const;
+    int send_data_len();
+
     void set_msg_type (int);
     int get_msg_type();
 
+    // 重置到默认值
+    void clear();
 
-    template<typename T>
-    void set_send_data(const T& t)
+public:
+    template <class T >
+    void serialization_data_Asio(const T& t)
     {
-        std::ostringstream os;
+        ostringstream os;
         boost::archive::text_oarchive oa(os);
         oa & t;
 
         m_send_data.clear();
         m_send_data = os.str();
-        std::cout << "now, string: " << m_send_data << std::endl;
+        cout << "now, string: " << m_send_data << endl;
+    }
+
+    template <class T>
+    void serialization_data_protobuf(const T& t)
+    {
+        m_send_data.clear();
+        bool result = t.SerializeToString(&m_send_data);
+
+        cout << "serialize result: " << result << endl;
     }
 
 
-    std::string get_send_data();
 
-    int send_data_len();
-
-protected:
 private:
     int m_type;
-    int m_data_len;
     std::string m_send_data;
 
 };
