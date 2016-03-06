@@ -49,6 +49,7 @@ void DispatchSession::initialization()
 void DispatchSession::start()
 {
     read_head();
+    m_vecMsgSvrs.emplace_back(this, m_sock);;
 }
 
 void DispatchSession::process_msg(int type_,string buf_)
@@ -151,6 +152,7 @@ void DispatchSession::handle_user_login(string buf_)
         return;
     }
 
+    cout << "add user success!" << endl;
     it->add_user(ml.m_id);
 }
 
