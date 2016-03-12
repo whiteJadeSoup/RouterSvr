@@ -26,26 +26,18 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
     endif ()
 
 
-# 设置boost库路径
-set (Boost_root_path    ../boost)
-set (Boost_head_path    ${Boost_root_path}/include)
-set (Boost_lib_path	    ${Boost_root_path}/lib)
 
+# find Boost
+set(Boost_USE_STATIC_LIBS ON)
 
-include_directories(${Boost_head_path})
-LINK_DIRECTORIES(${Boost_lib_path})
+find_package(Boost 1.50.0 REQUIRED COMPONENTS system serialization)
+if(Boost_FOUND)
 
-
-set (Boost_system_lib 		    libboost_system.a)
-set (Boost_serialization_lib 	libboost_serialization.a)
-set (Boost_signals_lib 		    libboost_signals.a)
-
-
-set (Used_libs ${Boost_system_lib} ${Boost_serialization_lib} ${Boost_signals_lib})
-
-# set used protobuf
-set (Pb_lib	libprotobuf.a)
-set (Pb_used_libs ${Pb_lib})
+    message(STATUS  "Boost include dirs: " ${Boost_INCLUDE_DIRS})
+    message(STATUS  "Boost lib dirs: " ${Boost_LIBRARY_DIRS})
+    include_directories(${Boost_INCLUDE_DIRS})
+    LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+endif()
 
 
 # 当前目前下的所有源文件
@@ -54,7 +46,7 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${DIR_SRCS})
 
 
 #
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Used_libs} ${Pb_used_libs})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -lpthread)
 
 

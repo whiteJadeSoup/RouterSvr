@@ -64,10 +64,6 @@ protected:
 
 
 protected:
-    shared_ptr<google::protobuf::Message> CreateMessage(const string&);
-
-
-protected:
     using err_code = boost::system::error_code;
 
     /*

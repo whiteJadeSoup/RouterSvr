@@ -96,28 +96,6 @@ int32_t Handler::AsInt32 (const char* buf)
 }
 
 
-shared_ptr<google::protobuf::Message> Handler::CreateMessage(const string& type_name)
-{
-    using namespace google::protobuf;
-
-    const Descriptor* dr = DescriptorPool::generated_pool()->FindMessageTypeByName(type_name);
-    if (dr == nullptr)
-    {
-        return nullptr;
-    }
-
-    const Message* proto = MessageFactory::generated_factory()->GetPrototype(dr);
-
-    if (proto == nullptr)
-    {
-        return nullptr;
-    }
-
-    shared_ptr<Message> p_message(proto->New());
-    return p_message;
-}
-
-
 void Handler::encode(CMsg& msg)
 {
     cout << "start encode msg" << endl;
