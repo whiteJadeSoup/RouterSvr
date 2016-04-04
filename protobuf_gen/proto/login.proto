@@ -1,0 +1,9 @@
+
+syntax = "proto3";
+package IM;
+
+message LoginAccount
+{
+    int64 id = 1;
+    string passwd = 2;
+}

@@ -1,0 +1,7 @@
+syntax = "proto3";
+package IM;
+
+message Allocate
+{
+    int32 port = 1;	// 申请分配的端口
+}
