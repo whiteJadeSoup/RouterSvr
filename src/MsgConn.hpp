@@ -1,10 +1,10 @@
-#ifndef DISPATCHSESSION_HPP_INCLUDED
-#define DISPATCHSESSION_HPP_INCLUDED
+#ifndef MSGCONN_HPP_INCLUDED
+#define MSGCONN_HPP_INCLUDED
 
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
-#include <boost/asio/streambuf.hpp>
+#include <boost/asio/io_service.hpp>
 
 #include <vector>
 #include <array>
@@ -12,31 +12,34 @@
 #include <tuple>
 #include <map>
 
-#include "Handler.hpp"
+#include "Connection.hpp"
 #include "MsgSvrClient.hpp"
+#include "MessageDispatcher.h"
+
 
 using namespace boost::asio;
 using namespace std;
 
 
-class DispatchSession:public Handler
+class MsgConn :public Connection
 {
 public:
     using err_code = boost::system::error_code;
 
 public:
-    DispatchSession(ip::tcp::socket);
+    MsgConn(io_service&);
 
     void initialization();
-    virtual void start();
-    virtual void process_msg(int, string);
 
+    virtual void on_connect();
+    virtual void on_recv_msg(int, pb_message_ptr);
+    virtual void on_disconnect();
 
 public:
-    void handle_dispatch_chat(string);
-    void handle_user_login(string);
-    void handle_user_logout(string);
-    void handle_allocate_port(string);
+    void handle_dispatch_chat(pb_message_ptr);
+    void handle_user_login(pb_message_ptr);
+    void handle_user_logout(pb_message_ptr);
+    void handle_allocate_port(pb_message_ptr);
 
 private:
     // 随机获得【a,b】之间的数
@@ -53,5 +56,8 @@ private:
 
     tuple<int,int> m_min_and_max;
 
+private:
+    MessageDispatcher m_dispatcher;
+
 };
-#endif // DISPATCHSESSION_HPP_INCLUDED
+#endif // MSGCONN_HPP_INCLUDED

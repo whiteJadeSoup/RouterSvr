@@ -1,11 +1,12 @@
 #include "Server.hpp"
-#include "DispatchSession.hpp"
+#include "MsgConn.hpp"
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
 
 
 Server *g = nullptr;
+int Server::g_count = 1;
 
 /**********************************************
  *
@@ -14,7 +15,6 @@ Server *g = nullptr;
 
 Server::Server(unsigned short port_)
   :m_io_service(),
-   m_sockMsg(m_io_service),
    m_accMsg(m_io_service),
    m_signals(m_io_service)
 {
@@ -61,6 +61,10 @@ void Server::run()
 }
 
 
+int Server::allocate_conn_id()
+{
+    return (g_count++) % 65535;
+}
 
 
 /**********************************************
@@ -82,15 +86,18 @@ void Server::await_stop()
 
 void Server::wait_accept ()
 {
-    m_accMsg.async_accept(m_sockMsg, [this] (const err_code& ec)
+
+    m_msg_conn.reset(new MsgConn(m_io_service));
+    m_accMsg.async_accept(m_msg_conn->socket(), [this] (const err_code& ec)
         {
             if (!ec)
             {
-                cout << "address: " << m_sockMsg.remote_endpoint().address().to_string()
-                    << "port: " << m_sockMsg.remote_endpoint().port() << endl;
+                cout << "MsgSvr address: " << m_msg_conn->socket().remote_endpoint().address().to_string()
+                     << "MsgSVr port: " << m_msg_conn->socket().remote_endpoint().port() << endl;
 
 
-                std::make_shared<DispatchSession>(std::move(m_sockMsg))->start();
+                int id = allocate_conn_id();
+                m_msg_conn->connect(id);
             }
             wait_accept();
         });

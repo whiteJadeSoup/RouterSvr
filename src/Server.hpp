@@ -2,10 +2,18 @@
 #define SERVER_HPP
 
 #include <iostream>
+#include <memory>
+
+
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/io_service.hpp>
 #include <signal.h>
+
+
+
+class Connection;
+
 
 using namespace std;
 using namespace boost::asio;
@@ -23,20 +31,29 @@ public:
 public:
     void initialization();
     void run();
+    // 分配连接id
+    int allocate_conn_id();
+
+
 
 private:
-
     /// Wait for a request to stop the server.
     void await_stop();
-
     // 等待消息服务器连接
     void wait_accept ();
+
 private:
     io_service m_io_service;
-    ip::tcp::socket   m_sockMsg;
+
     ip::tcp::acceptor m_accMsg;
 
     signal_set m_signals;
+    //  connection for msgsvr
+    shared_ptr<Connection> m_msg_conn;
+
+
+private:
+    static int g_count;
 };
 
 extern Server* g;

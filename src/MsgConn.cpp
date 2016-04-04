@@ -1,10 +1,12 @@
-#include "DispatchSession.hpp"
+#include "MsgConn.hpp"
 #include "M2RMsgTypeDefine.hpp"
 #include "MsgStruct.hpp"
 
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
+#include "allocate.pb.h"
+
+
+#include <functional>
+
 
 /**********************************************
  *
@@ -14,9 +16,9 @@
 
 
 
-DispatchSession::DispatchSession(ip::tcp::socket socket_)
-    :Handler(std::move(socket_)),
-     m_min_and_max(std::make_tuple(0,0))
+MsgConn::MsgConn(io_service& io_)
+  :Connection(io_),
+   m_min_and_max(std::make_tuple(0,0))
 {
     initialization();
 
@@ -24,14 +26,13 @@ DispatchSession::DispatchSession(ip::tcp::socket socket_)
 
 
 
-
 /**********************************************
  *
  *
  *
  */
 
-void DispatchSession::initialization()
+void MsgConn::initialization()
 {
     std::string ports = "9500-9999";
     m_min_and_max = get_min_max_port(ports);
@@ -46,38 +47,41 @@ void DispatchSession::initialization()
 }
 
 
-void DispatchSession::start()
+void MsgConn::on_connect()
 {
+
+    m_dispatcher.register_message_callback((int)M2R::DISPATCH_CHAT,
+        bind(&MsgConn::handle_dispatch_chat, this, std::placeholders::_1));
+
+    m_dispatcher.register_message_callback((int)M2R::USER_LOGIN,
+        bind(&MsgConn::handle_user_login, this, std::placeholders::_1));
+
+    m_dispatcher.register_message_callback((int)M2R::USER_LOGOUT,
+        bind(&MsgConn::handle_user_logout, this, std::placeholders::_1));
+
+    m_dispatcher.register_message_callback((int)M2R::ALLOCATE_PORT,
+        bind(&MsgConn::handle_allocate_port, this, std::placeholders::_1));
+
+
     read_head();
-    m_vecMsgSvrs.emplace_back(this, m_sock);;
+
+    m_vecMsgSvrs.emplace_back(this, socket());
 }
 
-void DispatchSession::process_msg(int type_,string buf_)
+
+void MsgConn::on_disconnect()
 {
-    std::cout << "begin process msg. " << std::endl;
+
+
+}
+
+
+void MsgConn::on_recv_msg(int type_,pb_message_ptr p_msg_)
+{
+
     std::cout << "msg type: " << type_ << std::endl;
-    switch (type_)
-    {
-    case (int)M2R::DISPATCH_CHAT:
-        std::cout<< "chat!" << std::endl;
-        handle_dispatch_chat(buf_);
-        break;
 
-    case (int)M2R::USER_LOGIN:
-        std::cout<< "user login!" << std::endl;
-        handle_user_login(buf_);
-        break;
-
-    case (int)M2R::USER_LOGOUT:
-        std::cout<< "user logout!" << std::endl;
-        handle_user_logout(buf_);
-        break;
-
-    case (int)M2R::ALLOCATE_PORT:
-        std::cout<< "allocate port!" << std::endl;
-        handle_allocate_port(buf_);
-        break;
-    }
+    m_dispatcher.on_message(type_, p_msg_);
 
 }
 
@@ -90,11 +94,8 @@ void DispatchSession::process_msg(int type_,string buf_)
  *
  */
 
-void DispatchSession::handle_allocate_port(string buf_)
+void MsgConn::handle_allocate_port(pb_message_ptr p_msg_)
 {
-    std::ostringstream stream;
-    stream <<&m_rBuf;
-
 
 
     int nAllocatePort = 0;
@@ -117,13 +118,12 @@ void DispatchSession::handle_allocate_port(string buf_)
 
     std::cout << "allocate port: " << nAllocatePort << std::endl;
 
-    Msg_allocate_port msg_result;
-    msg_result.m_allocate_port = nAllocatePort;
+
+    IM::Allocate allocate;
+    allocate.set_port(nAllocatePort);
 
     CMsg packet;
-    packet.set_msg_type((int)M2R::ALLOCATE_PORT);
-    packet.serialization_data_Asio(msg_result);
-
+    packet.encode((int)M2R::ALLOCATE_PORT, allocate);
     send(packet);
 }
 
@@ -131,80 +131,137 @@ void DispatchSession::handle_allocate_port(string buf_)
 
 
 
-void DispatchSession::handle_user_login(string buf_)
+void MsgConn::handle_user_login(pb_message_ptr p_msg_)
 {
 
-    Msg_Login ml;
-    deserialization(ml, buf_);
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    using namespace google::protobuf;
 
-    std::cout << "login id: " << ml.m_id << std::endl;
+    auto descriptor = p_msg_->GetDescriptor();
+    const Reflection* rf = p_msg_->GetReflection();
+    const FieldDescriptor* f_id = descriptor->FindFieldByName("id");
 
 
-    auto it = std::find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
+    try
+    {
+        int64_t id = rf->GetInt64(*p_msg_, f_id);
+        cout << "login id: " << id << endl;
+
+        auto it = std::find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
             [this] (MsgSvrClient& m)
             {
-                return (DispatchSession*)m.get_context() == this;
+                return (MsgConn*)m.get_context() == this;
             });
 
-    if (it == m_vecMsgSvrs.end())
-    {
-        std::cout << "error! this msgsvr is not connect!" << std::endl;
-        return;
-    }
-
-    cout << "add user success!" << endl;
-    it->add_user(ml.m_id);
-}
-
-void DispatchSession::handle_user_logout(string buf_)
-{
-    Msg_Logout ml;
-    deserialization(ml, buf_);
-
-    auto it = std::find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
-        [this] (MsgSvrClient& m)
+        if (it == m_vecMsgSvrs.end())
         {
-            return (DispatchSession*)m.get_context() == this;
-        });
+            cout << "error! this msgsvr is not connect!" << endl;
+            return;
+        }
 
-    if (it == m_vecMsgSvrs.end())
+        it->add_user(id);
+    }
+    catch (exception& e)
     {
-        std::cout << "del error,this isn't exist!" << std::endl;
-        return;
+        cout << "# ERR: exception in " << __FILE__;
+        cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
+        cout << "# ERR: " << e.what() << endl;
     }
 
-    it->del_user(ml.m_id);
 }
 
-void DispatchSession::handle_dispatch_chat(string buf_)
+void MsgConn::handle_user_logout(pb_message_ptr p_msg_)
 {
-//
-    Msg_chat recv_chat;
-    deserialization(recv_chat, buf_);
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    using namespace google::protobuf;
 
-    std::cout << "sendid: "     << recv_chat.m_send_id
-              << "recvid: "     << recv_chat.m_recv_id
-              << "content: "    << recv_chat.m_content << std::endl;
-
-    auto it = find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
-        [=] (MsgSvrClient& m)
-        {
-            return m.is_in_svr(recv_chat.m_recv_id);
-        });
+    auto descriptor = p_msg_->GetDescriptor();
+    const Reflection* rf = p_msg_->GetReflection();
+    const FieldDescriptor* f_id = descriptor->FindFieldByName("id");
 
 
-    if (it == m_vecMsgSvrs.end())
+    try
     {
-        std::cout << "userid: " << recv_chat.m_recv_id << "offline!" << std::endl;
-        return;
+        int64_t id = rf->GetInt64(*p_msg_, f_id);
+        cout << "login id: " << id << endl;
+
+        auto it = std::find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
+            [this] (MsgSvrClient& m)
+            {
+                return (MsgConn*)m.get_context() == this;
+            });
+
+        if (it == m_vecMsgSvrs.end())
+        {
+            cout << "error! this msgsvr is not connect!" << endl;
+            return;
+        }
+
+        it->del_user(id);
     }
-
-    CMsg packet;
-    packet.set_msg_type((int)M2R::SEND_CHAT);
-    packet.serialization_data_Asio(recv_chat);
-
-    send(packet, it->get_socket());
+    catch (exception& e)
+    {
+        cout << "# ERR: exception in " << __FILE__;
+        cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
+        cout << "# ERR: " << e.what() << endl;
+    }
 }
+
+
+
+void MsgConn::handle_dispatch_chat(pb_message_ptr p_msg_)
+{
+
+    try
+    {
+
+        GOOGLE_PROTOBUF_VERIFY_VERSION;
+        using namespace google::protobuf;
+
+
+        auto descriptor = p_msg_->GetDescriptor();
+        const Reflection* rf = p_msg_->GetReflection();
+        const FieldDescriptor* f_send_id = descriptor->FindFieldByName("send_id");
+        const FieldDescriptor* f_recv_id = descriptor->FindFieldByName("recv_id");
+        const FieldDescriptor* f_content = descriptor->FindFieldByName("content");
+
+
+        int64_t send_id = rf->GetInt64(*p_msg_, f_send_id);
+        int64_t recv_id = rf->GetInt64(*p_msg_, f_recv_id);
+        string content = rf->GetString(*p_msg_, f_content);
+
+
+
+        cout << "chat sendid: "     << send_id
+             << "chat recvid: "     << recv_id
+             << "content: "         << content << endl;
+
+        auto it = find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
+            [=] (MsgSvrClient& m)
+            {
+                return m.is_in_svr(recv_id);
+            });
+
+        if (it == m_vecMsgSvrs.end())
+        {
+            std::cout << "userid: " << recv_id << "offline!" << std::endl;
+            return;
+        }
+
+
+        CMsg packet;
+        packet.encode((int)M2R::SEND_CHAT, *p_msg_);
+        send(packet, it->get_socket());
+    }
+    catch (exception& e)
+    {
+        cout << "# ERR: exception in " << __FILE__;
+        cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
+        cout << "# ERR: " << e.what() << endl;
+    }
+}
+
+
 
 
 
@@ -215,13 +272,13 @@ void DispatchSession::handle_dispatch_chat(string buf_)
  */
 
 
-int DispatchSession::random(int min, int max)
+int MsgConn::random(int min, int max)
 {
     srand((int)time(NULL));
     return min + rand() % (max-min+1);
 }
 
-std::tuple<int,int> DispatchSession::get_min_max_port(std::string ports)
+std::tuple<int,int> MsgConn::get_min_max_port(std::string ports)
 {
     int min=0,max=0;
     int index = ports.find('-');
