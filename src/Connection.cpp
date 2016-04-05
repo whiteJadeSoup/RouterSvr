@@ -223,13 +223,13 @@ tuple<int, pb_message_ptr> Connection::decode()
 
     // 类名长度
     int32_t name_len = AsInt32(trans_data.c_str());
-    cout << "name_len: " << name_len << endl;
+    cout << "Decode Type Name Len: " << name_len << endl;
     trans_data = trans_data.substr(sizeof(int32_t));
 
     // 类名
     const char* chr_name = trans_data.c_str();
     string type_name = string(chr_name, name_len-1);
-    cout << "type_name: " << type_name << endl;
+    cout << "Decode Type Name: " << type_name << endl;
 
 
     shared_ptr<google::protobuf::Message> p_ms = CreateMessage(type_name);
@@ -246,7 +246,7 @@ tuple<int, pb_message_ptr> Connection::decode()
 
         const char* buf_ = trans_data.c_str();
         int size = trans_data.size();
-        cout << "data Len: " << size << endl;
+        cout << "Decode Data Len: " << size << endl;
 
         p_ms->ParseFromArray(buf_, size);
         return make_tuple(type, p_ms);
@@ -293,7 +293,7 @@ void Connection::handle_read_body(const err_code& ec, std::size_t byte_trans)
 
     if (!ec)
     {
-        cout << "readed data size: " << byte_trans <<endl;
+        cout << "Readed data size: " << byte_trans <<endl;
 
         recv_msg();
 
@@ -318,7 +318,7 @@ void Connection::handle_write(const err_code& ec, std::size_t byte_trans)
 {
     if (!ec)
     {
-        cout << "sended data len: " << byte_trans << endl;
+        cout << "Send Packet Len: " << byte_trans << endl;
     }
 
     else
@@ -338,7 +338,7 @@ void Connection::handle_write_done_shutdown(const err_code& ec, std::size_t byte
 
     if (!ec)
     {
-        cout << "sended data len: " << byte_trans << endl;
+        cout << "Send Packet Len: " << byte_trans << endl;
 
         // 发送验证结果后断开连接
         if (sock_.is_open())

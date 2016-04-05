@@ -79,7 +79,7 @@ void MsgConn::on_disconnect()
 void MsgConn::on_recv_msg(int type_,pb_message_ptr p_msg_)
 {
 
-    std::cout << "msg type: " << type_ << std::endl;
+    std::cout << "Recv msg type: " << type_ << std::endl;
 
     m_dispatcher.on_message(type_, p_msg_);
 
@@ -106,10 +106,6 @@ void MsgConn::handle_allocate_port(pb_message_ptr p_msg_)
     do
     {
         nAllocatePort = random(nMinPort, nMaxPort);
-        cout << "m_PortUses["
-             << nAllocatePort <<"] ="
-             << m_PortUses[nAllocatePort] << endl;
-
     }
     while(m_PortUses[nAllocatePort]);
 
@@ -133,17 +129,18 @@ void MsgConn::handle_allocate_port(pb_message_ptr p_msg_)
 
 void MsgConn::handle_user_login(pb_message_ptr p_msg_)
 {
-
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-    using namespace google::protobuf;
-
-    auto descriptor = p_msg_->GetDescriptor();
-    const Reflection* rf = p_msg_->GetReflection();
-    const FieldDescriptor* f_id = descriptor->FindFieldByName("id");
-
-
     try
     {
+        GOOGLE_PROTOBUF_VERIFY_VERSION;
+        using namespace google::protobuf;
+
+        auto descriptor = p_msg_->GetDescriptor();
+        const Reflection* rf = p_msg_->GetReflection();
+        const FieldDescriptor* f_id = descriptor->FindFieldByName("id");
+
+        assert(f_id && f_id->type()==FieldDescriptor::TYPE_INT64);
+
+
         int64_t id = rf->GetInt64(*p_msg_, f_id);
         cout << "login id: " << id << endl;
 
@@ -155,7 +152,7 @@ void MsgConn::handle_user_login(pb_message_ptr p_msg_)
 
         if (it == m_vecMsgSvrs.end())
         {
-            cout << "error! this msgsvr is not connect!" << endl;
+            cout << "error! this msgsvr is not connect! conn id: " << get_conn_id() << endl;
             return;
         }
 
@@ -172,18 +169,22 @@ void MsgConn::handle_user_login(pb_message_ptr p_msg_)
 
 void MsgConn::handle_user_logout(pb_message_ptr p_msg_)
 {
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-    using namespace google::protobuf;
-
-    auto descriptor = p_msg_->GetDescriptor();
-    const Reflection* rf = p_msg_->GetReflection();
-    const FieldDescriptor* f_id = descriptor->FindFieldByName("id");
-
-
     try
     {
+
+        GOOGLE_PROTOBUF_VERIFY_VERSION;
+        using namespace google::protobuf;
+
+        auto descriptor = p_msg_->GetDescriptor();
+        const Reflection* rf = p_msg_->GetReflection();
+        const FieldDescriptor* f_id = descriptor->FindFieldByName("id");
+
+
+        assert(f_id && f_id->type()==FieldDescriptor::TYPE_INT64);
+
+
         int64_t id = rf->GetInt64(*p_msg_, f_id);
-        cout << "login id: " << id << endl;
+        cout << "logout id: " << id << endl;
 
         auto it = std::find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
             [this] (MsgSvrClient& m)
@@ -193,7 +194,7 @@ void MsgConn::handle_user_logout(pb_message_ptr p_msg_)
 
         if (it == m_vecMsgSvrs.end())
         {
-            cout << "error! this msgsvr is not connect!" << endl;
+            cout << "error! this msgsvr is not connect! conn id: " << get_conn_id() << endl;
             return;
         }
 
@@ -226,9 +227,14 @@ void MsgConn::handle_dispatch_chat(pb_message_ptr p_msg_)
         const FieldDescriptor* f_content = descriptor->FindFieldByName("content");
 
 
+        assert(f_send_id && f_send_id->type()==FieldDescriptor::TYPE_INT64);
+        assert(f_recv_id && f_recv_id->type()==FieldDescriptor::TYPE_INT64);
+        assert(f_content && f_content->type()==FieldDescriptor::TYPE_STRING);
+
+
         int64_t send_id = rf->GetInt64(*p_msg_, f_send_id);
         int64_t recv_id = rf->GetInt64(*p_msg_, f_recv_id);
-        string content = rf->GetString(*p_msg_, f_content);
+        string  content = rf->GetString(*p_msg_, f_content);
 
 
 
@@ -244,7 +250,7 @@ void MsgConn::handle_dispatch_chat(pb_message_ptr p_msg_)
 
         if (it == m_vecMsgSvrs.end())
         {
-            std::cout << "userid: " << recv_id << "offline!" << std::endl;
+            std::cout << "userid: " << recv_id << " offline!" << std::endl;
             return;
         }
 

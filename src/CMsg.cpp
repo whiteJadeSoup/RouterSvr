@@ -73,7 +73,7 @@ bool CMsg::encode(int type_, const google::protobuf::Message& message_)
     else
     {
         m_send_data.clear();
-        std::cout << "序列化数据失败!" << std::endl;
+        std::cout << "encode packet fail!" << std::endl;
         return false;
     }
 }
