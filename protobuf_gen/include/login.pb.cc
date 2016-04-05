@@ -21,9 +21,9 @@ namespace IM {
 
 namespace {
 
-const ::google::protobuf::Descriptor* LoginAccount_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* Account_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  LoginAccount_reflection_ = NULL;
+  Account_reflection_ = NULL;
 
 }  // namespace
 
@@ -34,22 +34,22 @@ void protobuf_AssignDesc_login_2eproto() {
     ::google::protobuf::DescriptorPool::generated_pool()->FindFileByName(
       "login.proto");
   GOOGLE_CHECK(file != NULL);
-  LoginAccount_descriptor_ = file->message_type(0);
-  static const int LoginAccount_offsets_[2] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoginAccount, id_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoginAccount, passwd_),
+  Account_descriptor_ = file->message_type(0);
+  static const int Account_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Account, id_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Account, passwd_),
   };
-  LoginAccount_reflection_ =
+  Account_reflection_ =
     ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
-      LoginAccount_descriptor_,
-      LoginAccount::default_instance_,
-      LoginAccount_offsets_,
+      Account_descriptor_,
+      Account::default_instance_,
+      Account_offsets_,
       -1,
       -1,
       -1,
-      sizeof(LoginAccount),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoginAccount, _internal_metadata_),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoginAccount, _is_default_instance_));
+      sizeof(Account),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Account, _internal_metadata_),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Account, _is_default_instance_));
 }
 
 namespace {
@@ -63,14 +63,14 @@ inline void protobuf_AssignDescriptorsOnce() {
 void protobuf_RegisterTypes(const ::std::string&) {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-      LoginAccount_descriptor_, &LoginAccount::default_instance());
+      Account_descriptor_, &Account::default_instance());
 }
 
 }  // namespace
 
 void protobuf_ShutdownFile_login_2eproto() {
-  delete LoginAccount::default_instance_;
-  delete LoginAccount_reflection_;
+  delete Account::default_instance_;
+  delete Account_reflection_;
 }
 
 void protobuf_AddDesc_login_2eproto() {
@@ -80,12 +80,12 @@ void protobuf_AddDesc_login_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\013login.proto\022\002IM\"*\n\014LoginAccount\022\n\n\002id\030"
-    "\001 \001(\003\022\016\n\006passwd\030\002 \001(\tb\006proto3", 69);
+    "\n\013login.proto\022\002IM\"%\n\007Account\022\n\n\002id\030\001 \001(\003"
+    "\022\016\n\006passwd\030\002 \001(\tb\006proto3", 64);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "login.proto", &protobuf_RegisterTypes);
-  LoginAccount::default_instance_ = new LoginAccount();
-  LoginAccount::default_instance_->InitAsDefaultInstance();
+  Account::default_instance_ = new Account();
+  Account::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_login_2eproto);
 }
 
@@ -109,29 +109,29 @@ static void MergeFromFail(int line) {
 // ===================================================================
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
-const int LoginAccount::kIdFieldNumber;
-const int LoginAccount::kPasswdFieldNumber;
+const int Account::kIdFieldNumber;
+const int Account::kPasswdFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
-LoginAccount::LoginAccount()
+Account::Account()
   : ::google::protobuf::Message(), _internal_metadata_(NULL) {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:IM.LoginAccount)
+  // @@protoc_insertion_point(constructor:IM.Account)
 }
 
-void LoginAccount::InitAsDefaultInstance() {
+void Account::InitAsDefaultInstance() {
   _is_default_instance_ = true;
 }
 
-LoginAccount::LoginAccount(const LoginAccount& from)
+Account::Account(const Account& from)
   : ::google::protobuf::Message(),
     _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:IM.LoginAccount)
+  // @@protoc_insertion_point(copy_constructor:IM.Account)
 }
 
-void LoginAccount::SharedCtor() {
+void Account::SharedCtor() {
     _is_default_instance_ = false;
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
@@ -139,52 +139,52 @@ void LoginAccount::SharedCtor() {
   passwd_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
-LoginAccount::~LoginAccount() {
-  // @@protoc_insertion_point(destructor:IM.LoginAccount)
+Account::~Account() {
+  // @@protoc_insertion_point(destructor:IM.Account)
   SharedDtor();
 }
 
-void LoginAccount::SharedDtor() {
+void Account::SharedDtor() {
   passwd_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != default_instance_) {
   }
 }
 
-void LoginAccount::SetCachedSize(int size) const {
+void Account::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* LoginAccount::descriptor() {
+const ::google::protobuf::Descriptor* Account::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return LoginAccount_descriptor_;
+  return Account_descriptor_;
 }
 
-const LoginAccount& LoginAccount::default_instance() {
+const Account& Account::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_login_2eproto();
   return *default_instance_;
 }
 
-LoginAccount* LoginAccount::default_instance_ = NULL;
+Account* Account::default_instance_ = NULL;
 
-LoginAccount* LoginAccount::New(::google::protobuf::Arena* arena) const {
-  LoginAccount* n = new LoginAccount;
+Account* Account::New(::google::protobuf::Arena* arena) const {
+  Account* n = new Account;
   if (arena != NULL) {
     arena->Own(n);
   }
   return n;
 }
 
-void LoginAccount::Clear() {
+void Account::Clear() {
   id_ = GOOGLE_LONGLONG(0);
   passwd_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
-bool LoginAccount::MergePartialFromCodedStream(
+bool Account::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:IM.LoginAccount)
+  // @@protoc_insertion_point(parse_start:IM.Account)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
@@ -213,7 +213,7 @@ bool LoginAccount::MergePartialFromCodedStream(
           DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
             this->passwd().data(), this->passwd().length(),
             ::google::protobuf::internal::WireFormatLite::PARSE,
-            "IM.LoginAccount.passwd"));
+            "IM.Account.passwd"));
         } else {
           goto handle_unusual;
         }
@@ -234,17 +234,17 @@ bool LoginAccount::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:IM.LoginAccount)
+  // @@protoc_insertion_point(parse_success:IM.Account)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:IM.LoginAccount)
+  // @@protoc_insertion_point(parse_failure:IM.Account)
   return false;
 #undef DO_
 }
 
-void LoginAccount::SerializeWithCachedSizes(
+void Account::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:IM.LoginAccount)
+  // @@protoc_insertion_point(serialize_start:IM.Account)
   // optional int64 id = 1;
   if (this->id() != 0) {
     ::google::protobuf::internal::WireFormatLite::WriteInt64(1, this->id(), output);
@@ -255,17 +255,17 @@ void LoginAccount::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->passwd().data(), this->passwd().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
-      "IM.LoginAccount.passwd");
+      "IM.Account.passwd");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
       2, this->passwd(), output);
   }
 
-  // @@protoc_insertion_point(serialize_end:IM.LoginAccount)
+  // @@protoc_insertion_point(serialize_end:IM.Account)
 }
 
-::google::protobuf::uint8* LoginAccount::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* Account::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:IM.LoginAccount)
+  // @@protoc_insertion_point(serialize_to_array_start:IM.Account)
   // optional int64 id = 1;
   if (this->id() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(1, this->id(), target);
@@ -276,17 +276,17 @@ void LoginAccount::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->passwd().data(), this->passwd().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
-      "IM.LoginAccount.passwd");
+      "IM.Account.passwd");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
         2, this->passwd(), target);
   }
 
-  // @@protoc_insertion_point(serialize_to_array_end:IM.LoginAccount)
+  // @@protoc_insertion_point(serialize_to_array_end:IM.Account)
   return target;
 }
 
-int LoginAccount::ByteSize() const {
+int Account::ByteSize() const {
   int total_size = 0;
 
   // optional int64 id = 1;
@@ -309,10 +309,10 @@ int LoginAccount::ByteSize() const {
   return total_size;
 }
 
-void LoginAccount::MergeFrom(const ::google::protobuf::Message& from) {
+void Account::MergeFrom(const ::google::protobuf::Message& from) {
   if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
-  const LoginAccount* source = 
-      ::google::protobuf::internal::DynamicCastToGenerated<const LoginAccount>(
+  const Account* source = 
+      ::google::protobuf::internal::DynamicCastToGenerated<const Account>(
           &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -321,7 +321,7 @@ void LoginAccount::MergeFrom(const ::google::protobuf::Message& from) {
   }
 }
 
-void LoginAccount::MergeFrom(const LoginAccount& from) {
+void Account::MergeFrom(const Account& from) {
   if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   if (from.id() != 0) {
     set_id(from.id());
@@ -332,100 +332,100 @@ void LoginAccount::MergeFrom(const LoginAccount& from) {
   }
 }
 
-void LoginAccount::CopyFrom(const ::google::protobuf::Message& from) {
+void Account::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void LoginAccount::CopyFrom(const LoginAccount& from) {
+void Account::CopyFrom(const Account& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool LoginAccount::IsInitialized() const {
+bool Account::IsInitialized() const {
 
   return true;
 }
 
-void LoginAccount::Swap(LoginAccount* other) {
+void Account::Swap(Account* other) {
   if (other == this) return;
   InternalSwap(other);
 }
-void LoginAccount::InternalSwap(LoginAccount* other) {
+void Account::InternalSwap(Account* other) {
   std::swap(id_, other->id_);
   passwd_.Swap(&other->passwd_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
 }
 
-::google::protobuf::Metadata LoginAccount::GetMetadata() const {
+::google::protobuf::Metadata Account::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = LoginAccount_descriptor_;
-  metadata.reflection = LoginAccount_reflection_;
+  metadata.descriptor = Account_descriptor_;
+  metadata.reflection = Account_reflection_;
   return metadata;
 }
 
 #if PROTOBUF_INLINE_NOT_IN_HEADERS
-// LoginAccount
+// Account
 
 // optional int64 id = 1;
-void LoginAccount::clear_id() {
+void Account::clear_id() {
   id_ = GOOGLE_LONGLONG(0);
 }
- ::google::protobuf::int64 LoginAccount::id() const {
-  // @@protoc_insertion_point(field_get:IM.LoginAccount.id)
+ ::google::protobuf::int64 Account::id() const {
+  // @@protoc_insertion_point(field_get:IM.Account.id)
   return id_;
 }
- void LoginAccount::set_id(::google::protobuf::int64 value) {
+ void Account::set_id(::google::protobuf::int64 value) {
   
   id_ = value;
-  // @@protoc_insertion_point(field_set:IM.LoginAccount.id)
+  // @@protoc_insertion_point(field_set:IM.Account.id)
 }
 
 // optional string passwd = 2;
-void LoginAccount::clear_passwd() {
+void Account::clear_passwd() {
   passwd_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- const ::std::string& LoginAccount::passwd() const {
-  // @@protoc_insertion_point(field_get:IM.LoginAccount.passwd)
+ const ::std::string& Account::passwd() const {
+  // @@protoc_insertion_point(field_get:IM.Account.passwd)
   return passwd_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- void LoginAccount::set_passwd(const ::std::string& value) {
+ void Account::set_passwd(const ::std::string& value) {
   
   passwd_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:IM.LoginAccount.passwd)
+  // @@protoc_insertion_point(field_set:IM.Account.passwd)
 }
- void LoginAccount::set_passwd(const char* value) {
+ void Account::set_passwd(const char* value) {
   
   passwd_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:IM.LoginAccount.passwd)
+  // @@protoc_insertion_point(field_set_char:IM.Account.passwd)
 }
- void LoginAccount::set_passwd(const char* value, size_t size) {
+ void Account::set_passwd(const char* value, size_t size) {
   
   passwd_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:IM.LoginAccount.passwd)
+  // @@protoc_insertion_point(field_set_pointer:IM.Account.passwd)
 }
- ::std::string* LoginAccount::mutable_passwd() {
+ ::std::string* Account::mutable_passwd() {
   
-  // @@protoc_insertion_point(field_mutable:IM.LoginAccount.passwd)
+  // @@protoc_insertion_point(field_mutable:IM.Account.passwd)
   return passwd_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- ::std::string* LoginAccount::release_passwd() {
+ ::std::string* Account::release_passwd() {
   
   return passwd_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- void LoginAccount::set_allocated_passwd(::std::string* passwd) {
+ void Account::set_allocated_passwd(::std::string* passwd) {
   if (passwd != NULL) {
     
   } else {
     
   }
   passwd_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), passwd);
-  // @@protoc_insertion_point(field_set_allocated:IM.LoginAccount.passwd)
+  // @@protoc_insertion_point(field_set_allocated:IM.Account.passwd)
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS

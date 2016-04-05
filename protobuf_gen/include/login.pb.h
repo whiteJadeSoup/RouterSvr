@@ -36,36 +36,36 @@ void protobuf_AddDesc_login_2eproto();
 void protobuf_AssignDesc_login_2eproto();
 void protobuf_ShutdownFile_login_2eproto();
 
-class LoginAccount;
+class Account;
 
 // ===================================================================
 
-class LoginAccount : public ::google::protobuf::Message {
+class Account : public ::google::protobuf::Message {
  public:
-  LoginAccount();
-  virtual ~LoginAccount();
+  Account();
+  virtual ~Account();
 
-  LoginAccount(const LoginAccount& from);
+  Account(const Account& from);
 
-  inline LoginAccount& operator=(const LoginAccount& from) {
+  inline Account& operator=(const Account& from) {
     CopyFrom(from);
     return *this;
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const LoginAccount& default_instance();
+  static const Account& default_instance();
 
-  void Swap(LoginAccount* other);
+  void Swap(Account* other);
 
   // implements Message ----------------------------------------------
 
-  inline LoginAccount* New() const { return New(NULL); }
+  inline Account* New() const { return New(NULL); }
 
-  LoginAccount* New(::google::protobuf::Arena* arena) const;
+  Account* New(::google::protobuf::Arena* arena) const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const LoginAccount& from);
-  void MergeFrom(const LoginAccount& from);
+  void CopyFrom(const Account& from);
+  void MergeFrom(const Account& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -80,7 +80,7 @@ class LoginAccount : public ::google::protobuf::Message {
   void SharedCtor();
   void SharedDtor();
   void SetCachedSize(int size) const;
-  void InternalSwap(LoginAccount* other);
+  void InternalSwap(Account* other);
   private:
   inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
     return _internal_metadata_.arena();
@@ -113,7 +113,7 @@ class LoginAccount : public ::google::protobuf::Message {
   ::std::string* release_passwd();
   void set_allocated_passwd(::std::string* passwd);
 
-  // @@protoc_insertion_point(class_scope:IM.LoginAccount)
+  // @@protoc_insertion_point(class_scope:IM.Account)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -126,7 +126,7 @@ class LoginAccount : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_login_2eproto();
 
   void InitAsDefaultInstance();
-  static LoginAccount* default_instance_;
+  static Account* default_instance_;
 };
 // ===================================================================
 
@@ -134,63 +134,63 @@ class LoginAccount : public ::google::protobuf::Message {
 // ===================================================================
 
 #if !PROTOBUF_INLINE_NOT_IN_HEADERS
-// LoginAccount
+// Account
 
 // optional int64 id = 1;
-inline void LoginAccount::clear_id() {
+inline void Account::clear_id() {
   id_ = GOOGLE_LONGLONG(0);
 }
-inline ::google::protobuf::int64 LoginAccount::id() const {
-  // @@protoc_insertion_point(field_get:IM.LoginAccount.id)
+inline ::google::protobuf::int64 Account::id() const {
+  // @@protoc_insertion_point(field_get:IM.Account.id)
   return id_;
 }
-inline void LoginAccount::set_id(::google::protobuf::int64 value) {
+inline void Account::set_id(::google::protobuf::int64 value) {
   
   id_ = value;
-  // @@protoc_insertion_point(field_set:IM.LoginAccount.id)
+  // @@protoc_insertion_point(field_set:IM.Account.id)
 }
 
 // optional string passwd = 2;
-inline void LoginAccount::clear_passwd() {
+inline void Account::clear_passwd() {
   passwd_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline const ::std::string& LoginAccount::passwd() const {
-  // @@protoc_insertion_point(field_get:IM.LoginAccount.passwd)
+inline const ::std::string& Account::passwd() const {
+  // @@protoc_insertion_point(field_get:IM.Account.passwd)
   return passwd_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void LoginAccount::set_passwd(const ::std::string& value) {
+inline void Account::set_passwd(const ::std::string& value) {
   
   passwd_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:IM.LoginAccount.passwd)
+  // @@protoc_insertion_point(field_set:IM.Account.passwd)
 }
-inline void LoginAccount::set_passwd(const char* value) {
+inline void Account::set_passwd(const char* value) {
   
   passwd_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:IM.LoginAccount.passwd)
+  // @@protoc_insertion_point(field_set_char:IM.Account.passwd)
 }
-inline void LoginAccount::set_passwd(const char* value, size_t size) {
+inline void Account::set_passwd(const char* value, size_t size) {
   
   passwd_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:IM.LoginAccount.passwd)
+  // @@protoc_insertion_point(field_set_pointer:IM.Account.passwd)
 }
-inline ::std::string* LoginAccount::mutable_passwd() {
+inline ::std::string* Account::mutable_passwd() {
   
-  // @@protoc_insertion_point(field_mutable:IM.LoginAccount.passwd)
+  // @@protoc_insertion_point(field_mutable:IM.Account.passwd)
   return passwd_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline ::std::string* LoginAccount::release_passwd() {
+inline ::std::string* Account::release_passwd() {
   
   return passwd_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void LoginAccount::set_allocated_passwd(::std::string* passwd) {
+inline void Account::set_allocated_passwd(::std::string* passwd) {
   if (passwd != NULL) {
     
   } else {
     
   }
   passwd_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), passwd);
-  // @@protoc_insertion_point(field_set_allocated:IM.LoginAccount.passwd)
+  // @@protoc_insertion_point(field_set_allocated:IM.Account.passwd)
 }
 
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
