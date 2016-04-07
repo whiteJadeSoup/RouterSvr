@@ -1,0 +1,10 @@
+syntax="proto3";
+package IM;
+
+message ChatPkt
+{
+    int64 	send_id 	= 1;	// 发送者id
+    int64 	recv_id 	= 2;	// 接受者id
+    string 	content 	= 3;	// 聊天内容
+    string	send_time	= 4;	// 发送时间
+}
