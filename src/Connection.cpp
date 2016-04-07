@@ -256,6 +256,17 @@ tuple<int, pb_message_ptr> Connection::decode()
 
 
 
+string Connection::get_cur_time()
+{
+    time_t t = time(nullptr);
+    ostringstream os;
+
+    char tmp[128];
+    strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&t));
+    return string(tmp);
+}
+
+
 
 
 /**********************************************

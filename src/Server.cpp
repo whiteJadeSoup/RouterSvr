@@ -1,8 +1,13 @@
 #include "Server.hpp"
 #include "MsgConn.hpp"
+#include "DbSvrConn.hpp"
+
+
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
+#include <boost/asio/connect.hpp>
+
 
 
 Server *g = nullptr;
@@ -50,13 +55,13 @@ Server::~Server()
 
 void Server::initialization()
 {
-
+    wait_accept();
+    connect_db();
 }
 
 
 void Server::run()
 {
-    wait_accept();
     m_io_service.run();
 }
 
@@ -101,6 +106,39 @@ void Server::wait_accept ()
             }
             wait_accept();
         });
+}
+
+
+void Server::connect_db()
+{
+    string address = "127.0.0.1";
+    string port  = "13000";
+
+    ip::tcp::resolver resolver(m_io_service);
+    ip::tcp::resolver::iterator it = resolver.resolve({address, port});
+
+
+    m_db_conn.reset(new DBSvrConn(m_io_service));
+
+    async_connect(m_db_conn->socket(), it,
+        [this] (const err_code& ec, ip::tcp::resolver::iterator it )
+        {
+            if (!ec)
+            {
+                cout << "connect db!" << endl;
+                int conn_id = allocate_conn_id();
+                m_db_conn->connect(conn_id);
+
+            }
+            else
+            {
+                cout << "error. try connect db..." << endl;
+                boost::asio::deadline_timer t(m_io_service, boost::posix_time::seconds(5));
+                t.wait();
+                connect_db();
+            }
+        });
+
 }
 
 

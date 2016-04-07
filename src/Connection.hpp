@@ -4,6 +4,10 @@
 #include <string>
 #include <iostream>
 #include <functional>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
+
 
 
 #include <boost/noncopyable.hpp>
@@ -67,7 +71,8 @@ public:
 protected:
     // 读取头部信息
     void read_head();
-
+    // 获得当前时间
+    string get_cur_time();
 
 
 private:
@@ -83,9 +88,9 @@ private:
     void read_body(int len);
     // 解包
     tuple<int, pb_message_ptr> decode();
-
     // 将字符串解析为int32
     int32_t AsInt32 (const char* buf);
+
     // 根据类名构建protobuf消息体
     // 返回nullptr如果没有该类名信息
     shared_ptr<google::protobuf::Message> CreateMessage(const string&);

@@ -41,6 +41,8 @@ private:
     void await_stop();
     // 等待消息服务器连接
     void wait_accept ();
+    // 主动连接dbsvr
+    void connect_db();
 
 private:
     io_service m_io_service;
@@ -50,7 +52,8 @@ private:
     signal_set m_signals;
     //  connection for msgsvr
     shared_ptr<Connection> m_msg_conn;
-
+    //  connection for dbsvr
+    shared_ptr<Connection> m_db_conn;
 
 private:
     static int g_count;

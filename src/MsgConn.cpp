@@ -1,6 +1,6 @@
 #include "MsgConn.hpp"
-#include "M2RMsgTypeDefine.hpp"
-#include "MsgStruct.hpp"
+#include "MsgTypeDefine.hpp"
+#include "DbSvrConn.hpp"
 
 #include "allocate.pb.h"
 
@@ -225,22 +225,24 @@ void MsgConn::handle_dispatch_chat(pb_message_ptr p_msg_)
         const FieldDescriptor* f_send_id = descriptor->FindFieldByName("send_id");
         const FieldDescriptor* f_recv_id = descriptor->FindFieldByName("recv_id");
         const FieldDescriptor* f_content = descriptor->FindFieldByName("content");
-
+        const FieldDescriptor* f_send_tm = descriptor->FindFieldByName("send_time");
 
         assert(f_send_id && f_send_id->type()==FieldDescriptor::TYPE_INT64);
         assert(f_recv_id && f_recv_id->type()==FieldDescriptor::TYPE_INT64);
         assert(f_content && f_content->type()==FieldDescriptor::TYPE_STRING);
+        assert(f_send_tm && f_send_tm->type()==FieldDescriptor::TYPE_STRING);
 
 
-        int64_t send_id = rf->GetInt64(*p_msg_, f_send_id);
-        int64_t recv_id = rf->GetInt64(*p_msg_, f_recv_id);
+        int64_t send_id = rf->GetInt64(*p_msg_,  f_send_id);
+        int64_t recv_id = rf->GetInt64(*p_msg_,  f_recv_id);
         string  content = rf->GetString(*p_msg_, f_content);
-
+        string  send_tm = rf->GetString(*p_msg_, f_send_tm);
 
 
         cout << "chat sendid: "     << send_id
              << "chat recvid: "     << recv_id
-             << "content: "         << content << endl;
+             << "content: "         << content
+             << "send time: "       << send_tm << endl;
 
         auto it = find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
             [=] (MsgSvrClient& m)
@@ -250,14 +252,20 @@ void MsgConn::handle_dispatch_chat(pb_message_ptr p_msg_)
 
         if (it == m_vecMsgSvrs.end())
         {
-            std::cout << "userid: " << recv_id << " offline!" << std::endl;
-            return;
+            cout << "userid: " << recv_id << " offline!" << endl;
+
+            // 存储离线消息
+            CMsg packet;
+            packet.encode((int)R2D::ADD_OFFLINE_MESSAGE, *p_msg_);
+            send_to_db(packet);
         }
 
-
-        CMsg packet;
-        packet.encode((int)M2R::SEND_CHAT, *p_msg_);
-        send(packet, it->get_socket());
+        else
+        {
+            CMsg packet;
+            packet.encode((int)M2R::SEND_CHAT, *p_msg_);
+            send(packet, it->get_socket());
+        }
     }
     catch (exception& e)
     {
