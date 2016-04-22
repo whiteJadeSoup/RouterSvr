@@ -53,6 +53,8 @@ bool CMsg::encode(int type_, const google::protobuf::Message& message_)
     int32_t be_name_len = ::htonl(name_len);
     m_send_data.append(reinterpret_cast<char*>(&be_name_len), sizeof(be_name_len));
 
+    cout << "encode type name: " << type_name << endl;
+
     // 类名
     m_send_data.append(type_name.c_str(), name_len);
 
