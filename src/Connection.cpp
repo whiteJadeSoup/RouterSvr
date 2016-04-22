@@ -62,8 +62,8 @@ void Connection::send(CMsg& msg, ip::tcp::socket& sock_)
     cout << "start send msg." << endl;
     auto self = shared_from_this();
 
-
-    async_write(sock_, boost::asio::buffer(msg.get_send_data()),
+    string data = msg.get_send_data();
+    async_write(sock_, boost::asio::buffer(data),
         m_strand.wrap(
             boost::bind(&Connection::handle_write, shared_from_this(),
                       boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred)
@@ -78,7 +78,8 @@ void Connection::send(CMsg& msg)
     cout << "start send msg." << endl;
     auto self = shared_from_this();
 
-    async_write(m_sock, boost::asio::buffer(msg.get_send_data()),
+    string data = msg.get_send_data();
+    async_write(m_sock, boost::asio::buffer(data),
         m_strand.wrap(
             boost::bind(&Connection::handle_write, shared_from_this(),
                       boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred)

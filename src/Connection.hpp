@@ -35,6 +35,23 @@ typedef shared_ptr<google::protobuf::Message> pb_message_ptr;
 
 
 
+#define TRY                                 \
+    try                                     \
+    {                                       \
+        GOOGLE_PROTOBUF_VERIFY_VERSION;     \
+        using namespace google::protobuf;   \
+
+#define CATCH                               \
+    }                                       \
+    catch (exception& e)                    \
+    {                                                                   \
+        cout << "# ERR: exception in " << __FILE__;                     \
+        cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;\
+        cout << "# ERR: " << e.what() << endl;                          \
+    }                                                                   \
+
+
+
 class Connection
     :public enable_shared_from_this<Connection>,
      private boost::noncopyable
