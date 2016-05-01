@@ -1,0 +1,19 @@
+syntax="proto3";
+package IM;
+
+import "chat.proto";
+
+message MessageCach
+{
+    int64 user_id			= 1; // 用户id
+    repeated ChatPkt chat_message	= 2; // 离线消息集合
+}
+
+
+// 频道离线消息集合
+message ChannelMsgCach
+{
+    int64 req_id				= 1; // 请求者id
+    repeated ChannelChatPkt channel_messages 	= 2;// 频道离线消息集合
+}
+

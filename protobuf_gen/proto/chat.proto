@@ -5,6 +5,17 @@ message ChatPkt
 {
     int64 	send_id 	= 1;	// 发送者id
     int64 	recv_id 	= 2;	// 接受者id
-    string 	content 	= 3;	// 聊天内容
+    bytes 	content 	= 3;	// 聊天内容
     string	send_time	= 4;	// 发送时间
+}
+
+
+
+message ChannelChatPkt
+{
+    int64 	send_id 	= 1;	// 发送者id
+    int64 	recv_id 	= 2;	// 接受者id
+    int32	channel_id	= 3;	// 频道id
+    bytes 	content 	= 4;	// 聊天内容
+    string	send_time	= 5;	// 发送时间	
 }

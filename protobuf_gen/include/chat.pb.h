@@ -36,6 +36,7 @@ void protobuf_AddDesc_chat_2eproto();
 void protobuf_AssignDesc_chat_2eproto();
 void protobuf_ShutdownFile_chat_2eproto();
 
+class ChannelChatPkt;
 class ChatPkt;
 
 // ===================================================================
@@ -108,13 +109,13 @@ class ChatPkt : public ::google::protobuf::Message {
   ::google::protobuf::int64 recv_id() const;
   void set_recv_id(::google::protobuf::int64 value);
 
-  // optional string content = 3;
+  // optional bytes content = 3;
   void clear_content();
   static const int kContentFieldNumber = 3;
   const ::std::string& content() const;
   void set_content(const ::std::string& value);
   void set_content(const char* value);
-  void set_content(const char* value, size_t size);
+  void set_content(const void* value, size_t size);
   ::std::string* mutable_content();
   ::std::string* release_content();
   void set_allocated_content(::std::string* content);
@@ -146,6 +147,122 @@ class ChatPkt : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static ChatPkt* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ChannelChatPkt : public ::google::protobuf::Message {
+ public:
+  ChannelChatPkt();
+  virtual ~ChannelChatPkt();
+
+  ChannelChatPkt(const ChannelChatPkt& from);
+
+  inline ChannelChatPkt& operator=(const ChannelChatPkt& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ChannelChatPkt& default_instance();
+
+  void Swap(ChannelChatPkt* other);
+
+  // implements Message ----------------------------------------------
+
+  inline ChannelChatPkt* New() const { return New(NULL); }
+
+  ChannelChatPkt* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ChannelChatPkt& from);
+  void MergeFrom(const ChannelChatPkt& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(ChannelChatPkt* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int64 send_id = 1;
+  void clear_send_id();
+  static const int kSendIdFieldNumber = 1;
+  ::google::protobuf::int64 send_id() const;
+  void set_send_id(::google::protobuf::int64 value);
+
+  // optional int64 recv_id = 2;
+  void clear_recv_id();
+  static const int kRecvIdFieldNumber = 2;
+  ::google::protobuf::int64 recv_id() const;
+  void set_recv_id(::google::protobuf::int64 value);
+
+  // optional int32 channel_id = 3;
+  void clear_channel_id();
+  static const int kChannelIdFieldNumber = 3;
+  ::google::protobuf::int32 channel_id() const;
+  void set_channel_id(::google::protobuf::int32 value);
+
+  // optional bytes content = 4;
+  void clear_content();
+  static const int kContentFieldNumber = 4;
+  const ::std::string& content() const;
+  void set_content(const ::std::string& value);
+  void set_content(const char* value);
+  void set_content(const void* value, size_t size);
+  ::std::string* mutable_content();
+  ::std::string* release_content();
+  void set_allocated_content(::std::string* content);
+
+  // optional string send_time = 5;
+  void clear_send_time();
+  static const int kSendTimeFieldNumber = 5;
+  const ::std::string& send_time() const;
+  void set_send_time(const ::std::string& value);
+  void set_send_time(const char* value);
+  void set_send_time(const char* value, size_t size);
+  ::std::string* mutable_send_time();
+  ::std::string* release_send_time();
+  void set_allocated_send_time(::std::string* send_time);
+
+  // @@protoc_insertion_point(class_scope:IM.ChannelChatPkt)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  ::google::protobuf::int64 send_id_;
+  ::google::protobuf::int64 recv_id_;
+  ::google::protobuf::internal::ArenaStringPtr content_;
+  ::google::protobuf::internal::ArenaStringPtr send_time_;
+  ::google::protobuf::int32 channel_id_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_chat_2eproto();
+  friend void protobuf_AssignDesc_chat_2eproto();
+  friend void protobuf_ShutdownFile_chat_2eproto();
+
+  void InitAsDefaultInstance();
+  static ChannelChatPkt* default_instance_;
 };
 // ===================================================================
 
@@ -183,7 +300,7 @@ inline void ChatPkt::set_recv_id(::google::protobuf::int64 value) {
   // @@protoc_insertion_point(field_set:IM.ChatPkt.recv_id)
 }
 
-// optional string content = 3;
+// optional bytes content = 3;
 inline void ChatPkt::clear_content() {
   content_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -201,7 +318,7 @@ inline void ChatPkt::set_content(const char* value) {
   content_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
   // @@protoc_insertion_point(field_set_char:IM.ChatPkt.content)
 }
-inline void ChatPkt::set_content(const char* value, size_t size) {
+inline void ChatPkt::set_content(const void* value, size_t size) {
   
   content_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
@@ -269,7 +386,141 @@ inline void ChatPkt::set_allocated_send_time(::std::string* send_time) {
   // @@protoc_insertion_point(field_set_allocated:IM.ChatPkt.send_time)
 }
 
+// -------------------------------------------------------------------
+
+// ChannelChatPkt
+
+// optional int64 send_id = 1;
+inline void ChannelChatPkt::clear_send_id() {
+  send_id_ = GOOGLE_LONGLONG(0);
+}
+inline ::google::protobuf::int64 ChannelChatPkt::send_id() const {
+  // @@protoc_insertion_point(field_get:IM.ChannelChatPkt.send_id)
+  return send_id_;
+}
+inline void ChannelChatPkt::set_send_id(::google::protobuf::int64 value) {
+  
+  send_id_ = value;
+  // @@protoc_insertion_point(field_set:IM.ChannelChatPkt.send_id)
+}
+
+// optional int64 recv_id = 2;
+inline void ChannelChatPkt::clear_recv_id() {
+  recv_id_ = GOOGLE_LONGLONG(0);
+}
+inline ::google::protobuf::int64 ChannelChatPkt::recv_id() const {
+  // @@protoc_insertion_point(field_get:IM.ChannelChatPkt.recv_id)
+  return recv_id_;
+}
+inline void ChannelChatPkt::set_recv_id(::google::protobuf::int64 value) {
+  
+  recv_id_ = value;
+  // @@protoc_insertion_point(field_set:IM.ChannelChatPkt.recv_id)
+}
+
+// optional int32 channel_id = 3;
+inline void ChannelChatPkt::clear_channel_id() {
+  channel_id_ = 0;
+}
+inline ::google::protobuf::int32 ChannelChatPkt::channel_id() const {
+  // @@protoc_insertion_point(field_get:IM.ChannelChatPkt.channel_id)
+  return channel_id_;
+}
+inline void ChannelChatPkt::set_channel_id(::google::protobuf::int32 value) {
+  
+  channel_id_ = value;
+  // @@protoc_insertion_point(field_set:IM.ChannelChatPkt.channel_id)
+}
+
+// optional bytes content = 4;
+inline void ChannelChatPkt::clear_content() {
+  content_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& ChannelChatPkt::content() const {
+  // @@protoc_insertion_point(field_get:IM.ChannelChatPkt.content)
+  return content_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void ChannelChatPkt::set_content(const ::std::string& value) {
+  
+  content_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:IM.ChannelChatPkt.content)
+}
+inline void ChannelChatPkt::set_content(const char* value) {
+  
+  content_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:IM.ChannelChatPkt.content)
+}
+inline void ChannelChatPkt::set_content(const void* value, size_t size) {
+  
+  content_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:IM.ChannelChatPkt.content)
+}
+inline ::std::string* ChannelChatPkt::mutable_content() {
+  
+  // @@protoc_insertion_point(field_mutable:IM.ChannelChatPkt.content)
+  return content_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* ChannelChatPkt::release_content() {
+  
+  return content_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void ChannelChatPkt::set_allocated_content(::std::string* content) {
+  if (content != NULL) {
+    
+  } else {
+    
+  }
+  content_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), content);
+  // @@protoc_insertion_point(field_set_allocated:IM.ChannelChatPkt.content)
+}
+
+// optional string send_time = 5;
+inline void ChannelChatPkt::clear_send_time() {
+  send_time_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& ChannelChatPkt::send_time() const {
+  // @@protoc_insertion_point(field_get:IM.ChannelChatPkt.send_time)
+  return send_time_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void ChannelChatPkt::set_send_time(const ::std::string& value) {
+  
+  send_time_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:IM.ChannelChatPkt.send_time)
+}
+inline void ChannelChatPkt::set_send_time(const char* value) {
+  
+  send_time_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:IM.ChannelChatPkt.send_time)
+}
+inline void ChannelChatPkt::set_send_time(const char* value, size_t size) {
+  
+  send_time_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:IM.ChannelChatPkt.send_time)
+}
+inline ::std::string* ChannelChatPkt::mutable_send_time() {
+  
+  // @@protoc_insertion_point(field_mutable:IM.ChannelChatPkt.send_time)
+  return send_time_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* ChannelChatPkt::release_send_time() {
+  
+  return send_time_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void ChannelChatPkt::set_allocated_send_time(::std::string* send_time) {
+  if (send_time != NULL) {
+    
+  } else {
+    
+  }
+  send_time_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), send_time);
+  // @@protoc_insertion_point(field_set_allocated:IM.ChannelChatPkt.send_time)
+}
+
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
+// -------------------------------------------------------------------
+
 
 // @@protoc_insertion_point(namespace_scope)
 
