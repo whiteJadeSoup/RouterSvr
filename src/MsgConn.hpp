@@ -37,6 +37,8 @@ public:
 
 public:
     void handle_dispatch_chat(pb_message_ptr);
+    /// 转发频道消息
+    void handle_dispatch_channel_chat(pb_message_ptr);
     void handle_user_login(pb_message_ptr);
     void handle_user_logout(pb_message_ptr);
     void handle_allocate_port(pb_message_ptr);

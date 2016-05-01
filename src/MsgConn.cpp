@@ -3,7 +3,7 @@
 #include "DbSvrConn.hpp"
 
 #include "allocate.pb.h"
-
+#include "message_cach.pb.h"
 
 #include <functional>
 
@@ -51,16 +51,21 @@ void MsgConn::on_connect()
 {
 
     m_dispatcher.register_message_callback((int)M2R::DISPATCH_CHAT,
-        bind(&MsgConn::handle_dispatch_chat, this, std::placeholders::_1));
+        bind(&MsgConn::handle_dispatch_chat,    this, std::placeholders::_1));
 
     m_dispatcher.register_message_callback((int)M2R::USER_LOGIN,
-        bind(&MsgConn::handle_user_login, this, std::placeholders::_1));
+        bind(&MsgConn::handle_user_login,       this, std::placeholders::_1));
 
     m_dispatcher.register_message_callback((int)M2R::USER_LOGOUT,
-        bind(&MsgConn::handle_user_logout, this, std::placeholders::_1));
+        bind(&MsgConn::handle_user_logout,      this, std::placeholders::_1));
 
     m_dispatcher.register_message_callback((int)M2R::ALLOCATE_PORT,
-        bind(&MsgConn::handle_allocate_port, this, std::placeholders::_1));
+        bind(&MsgConn::handle_allocate_port,    this, std::placeholders::_1));
+
+     m_dispatcher.register_message_callback((int)M2R::DISPATCH_CHANNEL_CHAT,
+        bind(&MsgConn::handle_dispatch_channel_chat,    this, std::placeholders::_1));
+
+
 
 
     read_head();
@@ -209,16 +214,88 @@ void MsgConn::handle_user_logout(pb_message_ptr p_msg_)
 }
 
 
+void MsgConn::handle_dispatch_channel_chat(pb_message_ptr p_msg_)
+{
+    TRY
+        auto descriptor = p_msg_->GetDescriptor();
+        const Reflection* rf = p_msg_->GetReflection();
+        const FieldDescriptor* f_messages = descriptor->FindFieldByName("channel_messages");
+
+        assert(f_messages && f_messages->is_repeated());
+
+
+        // 离线
+        IM::ChannelMsgCach offlinePkts;
+
+        RepeatedPtrField<IM::ChannelChatPkt> chat_messages
+            = rf->GetRepeatedPtrField<IM::ChannelChatPkt>(*p_msg_, f_messages);
+
+        auto it = chat_messages.begin();
+        for(; it != chat_messages.end(); ++it)
+        {
+
+            int64_t send_id = it->send_id();
+            int64_t recv_id = it->recv_id();
+            int32_t ch_id   = it->channel_id();
+            string content  = it->content();
+            string send_tm  = it->send_time();
+
+
+            IM::ChannelChatPkt channel_pkt;
+            channel_pkt.set_send_id(send_id);
+            channel_pkt.set_recv_id(recv_id);
+            channel_pkt.set_send_time(send_tm);
+            channel_pkt.set_content(content);
+            channel_pkt.set_channel_id(ch_id);
+
+
+            auto it = find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
+            [=] (MsgSvrClient& m)
+            {
+                return m.is_in_svr(recv_id);
+            });
+
+            if (it == m_vecMsgSvrs.end())
+            {
+                cout << "channell id: " << ch_id
+                     << "chat userid: " << recv_id << " offline!" << endl;
+
+                // 离线
+                IM::ChannelChatPkt* pChat = offlinePkts.add_channel_messages();
+                pChat->set_send_id(send_id);
+                pChat->set_recv_id(recv_id);
+                pChat->set_content(content);
+                pChat->set_send_time(send_tm);
+                pChat->set_channel_id(ch_id);
+
+            }
+            else
+            {
+                // 转发
+                CMsg packet;
+                packet.encode((int)M2R::DISPATCH_CHANNEL_CHAT, channel_pkt);
+                send(packet, it->get_socket());
+            }
+
+        }
+
+
+        if (offlinePkts.channel_messages_size() != 0)
+        {
+            CMsg packet;
+            packet.encode((int)R2D::ADD_OFFLINE_CHANNEL_MSG, offlinePkts);
+            send_to_db(packet);
+        }
+
+
+    CATCH
+}
+
 
 void MsgConn::handle_dispatch_chat(pb_message_ptr p_msg_)
 {
 
-    try
-    {
-
-        GOOGLE_PROTOBUF_VERIFY_VERSION;
-        using namespace google::protobuf;
-
+    TRY
 
         auto descriptor = p_msg_->GetDescriptor();
         const Reflection* rf = p_msg_->GetReflection();
@@ -229,7 +306,7 @@ void MsgConn::handle_dispatch_chat(pb_message_ptr p_msg_)
 
         assert(f_send_id && f_send_id->type()==FieldDescriptor::TYPE_INT64);
         assert(f_recv_id && f_recv_id->type()==FieldDescriptor::TYPE_INT64);
-        assert(f_content && f_content->type()==FieldDescriptor::TYPE_STRING);
+        assert(f_content && f_content->type()==FieldDescriptor::TYPE_BYTES);
         assert(f_send_tm && f_send_tm->type()==FieldDescriptor::TYPE_STRING);
 
 
@@ -238,11 +315,6 @@ void MsgConn::handle_dispatch_chat(pb_message_ptr p_msg_)
         string  content = rf->GetString(*p_msg_, f_content);
         string  send_tm = rf->GetString(*p_msg_, f_send_tm);
 
-
-        cout << "chat sendid: "     << send_id
-             << "chat recvid: "     << recv_id
-             << "content: "         << content
-             << "send time: "       << send_tm << endl;
 
         auto it = find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
             [=] (MsgSvrClient& m)
@@ -263,16 +335,10 @@ void MsgConn::handle_dispatch_chat(pb_message_ptr p_msg_)
         else
         {
             CMsg packet;
-            packet.encode((int)M2R::SEND_CHAT, *p_msg_);
+            packet.encode((int)M2R::DISPATCH_CHAT, *p_msg_);
             send(packet, it->get_socket());
         }
-    }
-    catch (exception& e)
-    {
-        cout << "# ERR: exception in " << __FILE__;
-        cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
-        cout << "# ERR: " << e.what() << endl;
-    }
+    CATCH
 }
 
 

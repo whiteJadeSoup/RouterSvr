@@ -41,6 +41,9 @@ typedef shared_ptr<google::protobuf::Message> pb_message_ptr;
         GOOGLE_PROTOBUF_VERIFY_VERSION;     \
         using namespace google::protobuf;   \
 
+
+
+
 #define CATCH                               \
     }                                       \
     catch (exception& e)                    \
