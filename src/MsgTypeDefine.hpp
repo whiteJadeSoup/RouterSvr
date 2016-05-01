@@ -24,6 +24,10 @@ enum class M2R
      *  @return port:  分配好的端口
      */
     ALLOCATE_PORT            = 2003,
+    /*
+     * 转发频道信息
+     */
+    DISPATCH_CHANNEL_CHAT    = 2004,
 
     SEND_CHAT                = 3000,
 };
@@ -40,6 +44,11 @@ enum class R2D
      */
 
     ADD_OFFLINE_MESSAGE     = 4000,
+    /*
+     *  添加一条或者多条频道离线消息
+     */
+    ADD_OFFLINE_CHANNEL_MSG = 4001,
+
 };
 
 
