@@ -239,6 +239,7 @@ void MsgConn::handle_dispatch_channel_chat(pb_message_ptr p_msg_)
             int32_t ch_id   = it->channel_id();
             string content  = it->content();
             string send_tm  = it->send_time();
+            string send_name= it->send_name();
 
 
             IM::ChannelChatPkt channel_pkt;
@@ -247,6 +248,7 @@ void MsgConn::handle_dispatch_channel_chat(pb_message_ptr p_msg_)
             channel_pkt.set_send_time(send_tm);
             channel_pkt.set_content(content);
             channel_pkt.set_channel_id(ch_id);
+            channel_pkt.set_send_name(send_name);
 
 
             auto it = find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
@@ -267,6 +269,7 @@ void MsgConn::handle_dispatch_channel_chat(pb_message_ptr p_msg_)
                 pChat->set_content(content);
                 pChat->set_send_time(send_tm);
                 pChat->set_channel_id(ch_id);
+                pChat->set_send_name(send_name);
 
             }
             else
@@ -303,17 +306,17 @@ void MsgConn::handle_dispatch_chat(pb_message_ptr p_msg_)
         const FieldDescriptor* f_recv_id = descriptor->FindFieldByName("recv_id");
         const FieldDescriptor* f_content = descriptor->FindFieldByName("content");
         const FieldDescriptor* f_send_tm = descriptor->FindFieldByName("send_time");
+        const FieldDescriptor* f_send_nm = descriptor->FindFieldByName("send_name");
 
         assert(f_send_id && f_send_id->type()==FieldDescriptor::TYPE_INT64);
         assert(f_recv_id && f_recv_id->type()==FieldDescriptor::TYPE_INT64);
         assert(f_content && f_content->type()==FieldDescriptor::TYPE_BYTES);
         assert(f_send_tm && f_send_tm->type()==FieldDescriptor::TYPE_STRING);
+        assert(f_send_nm && f_send_nm->type()==FieldDescriptor::TYPE_STRING);
 
 
-        int64_t send_id = rf->GetInt64(*p_msg_,  f_send_id);
+
         int64_t recv_id = rf->GetInt64(*p_msg_,  f_recv_id);
-        string  content = rf->GetString(*p_msg_, f_content);
-        string  send_tm = rf->GetString(*p_msg_, f_send_tm);
 
 
         auto it = find_if(m_vecMsgSvrs.begin(), m_vecMsgSvrs.end(),
